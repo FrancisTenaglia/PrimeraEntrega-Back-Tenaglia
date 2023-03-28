@@ -6,15 +6,14 @@ class ProductManager {
     }
 
     getProducts(){
-        console.log(this.products);
-
+        return this.products;
     } 
 
 
-    addProducts(title, description, price, thumbnail, stock) {
+    addProduct(title, description, price, thumbnail, stock) {
         ProductManager.last_code = ProductManager.last_code +1;
 
-        const new_products = {
+        const new_product = {
             code: ProductManager.last_code,
             description: description,
             title: title,
@@ -24,13 +23,25 @@ class ProductManager {
 
         }
         
-        this.products.push(new_products);
+        this.products.push(new_product);
         
     }
 
-
+    getProductsById(code) {
+        const product = this.products.find(product => product.code === code);
+        product?  console.log('El producto es: ', product) : console.log("No se encontro el producto");
+        return product;
+    
+    }
+    
 } 
 
 const manager = new ProductManager();
-manager.getProducts();
-manager.addProducts('producto 1','descripcion del producto 1', 1000, 'ruta', 15 )
+const products = manager.getProducts();
+console.log("Productos: ", products);
+manager.addProduct('producto 1','descripcion del producto 1', 1000, 'ruta', 15 );
+const products2 = manager.getProducts();
+console.log("Productos: ", products2);
+const product = manager.getProductsById(1);
+
+
