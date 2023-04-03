@@ -48,16 +48,14 @@ class ProductManager {
     
     };
 
-    updateProduct = async(id, campo, nuevoCampo) => {
-        const products = await fs.promises.readFile(this.path, 'utf-8')
+    updateProduct = async(id, campo, nuevoValor) => {
+        const products = await fs.promises.readFile(this.path, 'utf-8');
         const productsConv = JSON.parse(products); 
-        const productBuscado = productsConv.find(product => product.id === id);
-        productBuscado[campo] = nuevoCampo;
+        const indexBuscado = productsConv.findIndex(product => product.id === id);
+        productsConv[indexBuscado][campo] = nuevoValor; 
+        await fs.promises.writeFile(this.path, JSON.stringify(productsConv));
 
-
-
-
-    }
+    };
 
     deleteProduct = async (id) => {
         const products = await fs.promises.readFile(this.path, 'utf-8')
@@ -65,7 +63,7 @@ class ProductManager {
         const nuevoArrayDelete = productsConv.map(product => product.id !== id);
         await fs.promises.writeFile(this.path, JSON.stringify(nuevoArrayDelete));
 
-    }
+    };
     
 }; 
 
