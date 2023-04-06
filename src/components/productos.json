@@ -4,6 +4,7 @@
 {"id":4,"description":"Mountainbike S","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
 {"id":5,"description":"Mountainbike M","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
 {"id":6,"description":"Mountainbike XXL","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
-{"id":8,"description":"Mountainbike XXS","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
-{"id":9,"description":"Mountainbike L","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
+{"id":7,"description":"Mountainbike XXS","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
+{"id":8,"description":"Mountainbike L","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
+{"id":9,"description":"Mountainbike S","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"},
 {"id":10,"description":"Mountainbike S","title":"Bicicleta","price":14500,"thumbnail":"ruta","stock":12,"code":"123123"}]
