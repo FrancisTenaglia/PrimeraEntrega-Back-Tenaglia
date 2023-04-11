@@ -1,3 +1,4 @@
+const { json } = require('express');
 const fs = require('fs');
 
 class ProductManager {
@@ -8,14 +9,15 @@ class ProductManager {
         this.products = [];
     };
 
-    getProducts = async () => {
-        const listaProductos = await fs.promises.readFile(this.path, 'utf-8');
-        const listaProductosConv = JSON.parse(listaProductos);
-        return listaProductosConv;
-
-    
+    getProducts = async (cantidad) => {
+        try{
+            const listaProductos = await fs.promises.readFile(this.path, 'utf-8');
+            const listaProductosConv = await JSON.parse(listaProductos);
+            return cantidad!==0? listaProductosConv.slice(0, parseInt(cantidad)) : listaProductosConv ;
+        } catch(error){
+            console.log('Se produjo un error obteniendo el producto, error: ',error);
+        }
     };
-
 
     addProduct = async(objProduct) => {
         ProductManager.last_id = ProductManager.last_id +1;
@@ -28,64 +30,56 @@ class ProductManager {
             thumbnail: objProduct.thumbnail,
             stock: objProduct.stock || 1,
             code: objProduct.code
-
         }
         
         this.products.push(new_product);
 
-        await fs.promises.writeFile(this.path, JSON.stringify(this.products));
-        //console.log('si llego aca se actualizo');
-        
+        try {
+            await fs.promises.writeFile(this.path, JSON.stringify(this.products));
+            console.log('Se agrego el producto correctamente');
+        } catch(error){
+            console.log('sucedio un error: ',error);
+        }        
     };
 
 
-    
+    //Retorna undefined si no encuentra el producto
     getProductsById = async (id)=> {
-        const products = await fs.promises.readFile(this.path, 'utf-8')
-        const productsConv = JSON.parse(products);
-        const productBuscado = productsConv.find(product => product.id === id);
-        return productBuscado;
-    
+        try{
+            const products = await fs.promises.readFile(this.path, 'utf-8');
+            const productsConv = await JSON.parse(products);
+            const productBuscado = productsConv.find(product => product.id === id);
+            return productBuscado;
+        } catch(error){
+            console.log('Buscando el producto con el id: ',id, ' se produjo el error: ', error);
+        }
     };
 
     updateProduct = async(id, campo, nuevoValor) => {
-        const products = await fs.promises.readFile(this.path, 'utf-8');
-        const productsConv = JSON.parse(products); 
-        const indexBuscado = productsConv.findIndex(product => product.id === id);
-        productsConv[indexBuscado][campo] = nuevoValor; 
-        await fs.promises.writeFile(this.path, JSON.stringify(productsConv));
-
+        try{
+            const products = await fs.promises.readFile(this.path, 'utf-8');
+            const productsConv = await JSON.parse(products); 
+            const indexBuscado = productsConv.findIndex(product => product.id === id);
+            productsConv[indexBuscado][campo] = nuevoValor; 
+            await fs.promises.writeFile(this.path, JSON.stringify(productsConv));
+        } catch(error) {
+            console.log('Se produjo un error al actualizar el producto con el id: ',id,' en el campo:',campo,' error: ',error);
+        }
     };
 
     deleteProduct = async (id) => {
-        const products = await fs.promises.readFile(this.path, 'utf-8')
-        const productsConv = JSON.parse(products); 
-        const nuevoArrayDelete = productsConv.map(product => product.id !== id);
-        await fs.promises.writeFile(this.path, JSON.stringify(nuevoArrayDelete));
-
+        try{
+            const products = await fs.promises.readFile(this.path, 'utf-8')
+            const productsConv = await JSON.parse(products); 
+            const nuevoArrayDelete = productsConv.map(product => product.id !== id);
+            await fs.promises.writeFile(this.path, JSON.stringify(nuevoArrayDelete));
+        } catch (error){
+            console.log('Se produjo el siguiente error al tratar de eliminar el producto',error);
+        }
     };
     
-}; 
+};
 
-const manager = new ProductManager('./productos.json');
-manager.getProducts().then( (products) => {
 
-    console.log("ProductosViejos: ", products); 
-});
 
-manager.addProduct({
-    title: 'Bicicleta' ,
-    description: 'Mountainbike',
-    price: 14500, 
-    thumbnail: 'ruta' ,
-    stock: 12 ,
-    code: '123123'
-});
-
-manager.getProducts().then((products) => {
-    console.log('prudoctos 2',products)
-});
-
-  //aca muestro el array completo con el producto agregado
-const product = manager.getProductsById(1);
-
+exports.ProductManager = ProductManager;
