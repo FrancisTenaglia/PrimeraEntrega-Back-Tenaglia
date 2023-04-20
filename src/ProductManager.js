@@ -7,14 +7,14 @@ class ProductManager {
         this.path = archivoJson;
         this.products = [];
     };
-
+    
     getProducts = async (cantidad) => {
         try{
             const listaProductos = await fs.promises.readFile(this.path, 'utf-8');
             const listaProductosConv = await JSON.parse(listaProductos);
             return cantidad!==0? listaProductosConv.slice(0, parseInt(cantidad)) : listaProductosConv ;
         } catch(error){
-            console.log('Se produjo un error obteniendo el producto, error: ',error);
+            console.log(`Error obteniendo el producto: ${error}`);
         }
     };
 
@@ -23,12 +23,14 @@ class ProductManager {
 
         const new_product = {
             id: ProductManager.last_id,
-            description: objProduct.description,
+            status: true,
             title: objProduct.title,
+            description: objProduct.description,
+            code: objProduct.code,
             price: objProduct.price,
-            thumbnail: objProduct.thumbnail,
-            stock: objProduct.stock || 1,
-            code: objProduct.code
+            stock: objProduct.stock,
+            category: objProduct.category,
+            thumbnails: objProduct.thumbnails,
         }
         
         this.products.push(new_product);
@@ -36,8 +38,8 @@ class ProductManager {
         try {
             await fs.promises.writeFile(this.path, JSON.stringify(this.products));
             console.log('Se agrego el producto correctamente');
-        } catch(error){
-            console.log('sucedio un error: ',error);
+        } catch (error) {
+            console.log(`Error al intentar agregar el producto: ${error}`);
         }        
     };
 
@@ -47,22 +49,28 @@ class ProductManager {
         try{
             const products = await fs.promises.readFile(this.path, 'utf-8');
             const productsConv = await JSON.parse(products);
-            const productBuscado = productsConv.find(product => product.id === id);
+            const productBuscado = productsConv.find(product => product.id === parseInt(id));
             return productBuscado;
         } catch(error){
-            console.log('Buscando el producto con el id: ',id, ' se produjo el error: ', error);
+            console.log(`Buscando el producto con id: ${id}, se produjo el siguiente error: ${error}`);
         }
     };
 
-    updateProduct = async(id, campo, nuevoValor) => {
+    updateProduct = async(id, campos, nuevosValores) => {
         try{
             const products = await fs.promises.readFile(this.path, 'utf-8');
-            const productsConv = await JSON.parse(products); 
-            const indexBuscado = productsConv.findIndex(product => product.id === id);
-            productsConv[indexBuscado][campo] = nuevoValor; 
+            const productsConv = await JSON.parse(products);
+            const indexBuscado = productsConv.findIndex(product => product.id === parseInt(id));
+            let campo = '';
+            let nuevoValor = '';
+            for(let i=0; i<campos.length; i++) {
+                campo=campos[i];
+                nuevoValor=nuevosValores[i];
+                productsConv[indexBuscado][campo] = nuevoValor; 
+            }
             await fs.promises.writeFile(this.path, JSON.stringify(productsConv));
         } catch(error) {
-            console.log('Se produjo un error al actualizar el producto con el id: ',id,' en el campo:',campo,' error: ',error);
+            console.log(`Actualizando el producto con id: ${id}, se produjo el siguiente error: ${error}`);
         }
     };
 
@@ -70,15 +78,13 @@ class ProductManager {
         try{
             const products = await fs.promises.readFile(this.path, 'utf-8')
             const productsConv = await JSON.parse(products); 
-            const nuevoArrayDelete = productsConv.map(product => product.id !== id);
+            const nuevoArrayDelete = productsConv.map(product => product.id !== parseInt(id));
             await fs.promises.writeFile(this.path, JSON.stringify(nuevoArrayDelete));
         } catch (error){
-            console.log('Se produjo el siguiente error al tratar de eliminar el producto',error);
+            console.log(`Intentado eliminar el producto con id: ${id}, se produjo el siguiente error: ${error}`);
         }
     };
     
 };
-
-
 
 exports.ProductManager = ProductManager;
