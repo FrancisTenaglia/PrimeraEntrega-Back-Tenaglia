@@ -6,7 +6,7 @@ const router = express.Router();
 const PARAMETERS = ['title', 'description', 'code', 'price', 'stock', 'category'];
 
 // aca inicializo el PM importado
-const productManager = new ProductManager('./productos.json');
+const productManager = new ProductManager((`${__dirname}/../productos.json`));
 
 // [GET] endpoint /products --> devuelve todos los productos existentes. Si se pasa un valor "limit" por query
 // devuelve los primeros "limit" productos. 
