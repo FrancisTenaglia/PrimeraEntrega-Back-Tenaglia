@@ -1,18 +1,21 @@
 // Endpoint de productos
-const express = require('express');
-const { ProductManager } = require('../ProductManager');
+import { Router } from 'express';
+import ProductManager from '../ProductManager.js';
+import { __dirname } from '../utils.js';
 
-const router = express.Router();
+const router = Router();
 const PARAMETERS = ['title', 'description', 'code', 'price', 'stock', 'category'];
 
 // aca inicializo el PM importado
-const productManager = new ProductManager((`${__dirname}/../productos.json`));
+const productManager = new ProductManager((`${__dirname}/../src/productos.json`));
 
 // [GET] endpoint /products --> devuelve todos los productos existentes. Si se pasa un valor "limit" por query
 // devuelve los primeros "limit" productos. 
 router.get('/', async (req, res) => {
     try {
-      res.send(await productManager.getProducts( req.query.limit || 0 ));
+      const productos = await productManager.getProducts( req.query.limit || 0 ); 
+      // res.send(productos);
+      res.render('home', {products: productos });
     } catch(error) {
       res.status(500).send({ error: 'Error al intentar obtener los productos' })
     } 
@@ -68,4 +71,4 @@ router.delete('/:pid', async(req, res) =>{
     }
 });
 
-module.exports = router;
+export default router;
