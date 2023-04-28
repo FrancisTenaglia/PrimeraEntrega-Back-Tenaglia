@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 class ProductManager {
     static last_id = 0;
@@ -87,4 +87,4 @@ class ProductManager {
     
 };
 
-exports.ProductManager = ProductManager;
+export default ProductManager;

@@ -1,39 +1,80 @@
 // Endpoint de productos
-const express = require('express');
+import { Router } from 'express';
+import fs from 'fs';
 
-const cartsRouter = express.Router();
-
-let carrito = [];
+const cartsRouter = Router();
 let id = 0;
+let carritos = [];
 
-cartsRouter.get('/',async (req, res) => {
-    res.send({ message: carrito})
+cartsRouter.get('/', async (req, res) => {
+    try{
+      const carritoGet = await fs.promises.readFile('./routes/carrito.json', 'utf-8');
+      const carritoGetConv = await JSON.parse(carritoGet);
+      res.status(200).send(carritoGetConv);
+  } catch(error){
+    console.log(error) 
+    res.status(500).send({ error: 'Error al intentar obtener el carrito' })
+  }
 });
 
-// [GET] endpoint /carts/:cid --> devuelve los productos asociados a ese carrito si existe, sino un array vacio 
-cartsRouter.get('/:cid',async (req, res) => {
-    const productosBuscados = carrito.find(c => c.id === parseInt(req.params.cid)) || [];
-    if (productosBuscados) {
-        console.log('Producto encontrado: ', productosBuscados.products);
-        res.status(200).send({ message: 'Carrito con productos encontrado', data: productosBuscados})
+// [GET] endpoint /carts/:cid --> devuelve los productos asociados a ese carrito si existe
+cartsRouter.get('/:cid', async (req, res) => {
+  try{
+    const carritoGet = await fs.promises.readFile('./routes/carrito.json', 'utf-8');
+    const carritoGetConv = await JSON.parse(carritoGet);
+    const carritoBuscado = carritoGetConv.find(c => c.id === parseInt(req.params.cid));
+    if(carritoBuscado) {
+      res.status(200).send(carritoBuscado);
+    } else {
+      res.status(200).send({ message: 'El carrito que intenta buscar, no existe'});
     }
-    else
-        res.status(500).send({ error: 'Error al intentar buscar el producto' })
+  } catch(error){
+    res.status(500).send({ error: 'Error al intentar buscar el producto' });
+  }
 });
 
 // [POST] endpoint /carts --> ingresa un nuevo carrito, dado un array de productos pasado por body
-cartsRouter.post('/', async(req, res) =>{
-    try{
+cartsRouter.post('/', async (req, res) => {
+    try {
       id = id + 1;
       const nuevoCarrito = {
         id,
         products: req.body,
       }
-      carrito.push(nuevoCarrito);
-      res.status(200).send({ message: 'Carrito nuevo agregado'})
+      carritos.push(nuevoCarrito);
+      await fs.promises.writeFile('./routes/carrito.json', JSON.stringify(carritos));
+      res.status(200).send({ estado: 'ok', message: 'Carrito nuevo agregado'})
     } catch (error) {
       res.status(500).send({ error: 'Error al intentar cargar el carrito' })
     }
 });
 
-module.exports = cartsRouter;
+// [POST] endpoint /carts/:cid/product/:pid --> ingresa un nuevo carrito, dado un array de productos pasado por body
+cartsRouter.post('/:cid/product/:pid', async (req, res) => {
+  try{
+    const carritoGet = await fs.promises.readFile('./routes/carrito.json', 'utf-8');
+    const carritoGetConv = await JSON.parse(carritoGet);
+    const carritoBuscado = carritoGetConv.find(c => c.id === parseInt(req.params.cid));
+    const indexBuscado = carritoGetConv.findIndex(c => c.id === parseInt(req.params.cid));
+    if(carritoBuscado) {
+      const indexprodBuscado = carritoBuscado.products.findIndex(product => product.id === parseInt(req.params.pid));
+      if (indexprodBuscado !== -1) {
+        carritoGetConv[indexBuscado].products[indexprodBuscado].quantity++;
+        await fs.promises.writeFile('./routes/carrito.json', JSON.stringify(carritoGetConv));
+        res.status(200).send({ message: 'Carrito actualizado con una unidad mas al producto'});
+      } else {
+        // agrego nuevo producto por primera vez
+        carritoGetConv[indexBuscado].products.push({ id: parseInt(req.params.pid), quantity: 1});
+        await fs.promises.writeFile('./routes/carrito.json', JSON.stringify(carritoGetConv));
+        res.status(200).send({ message: 'Carrito actualizado'});
+        
+      }
+    } else {
+      res.status(200).send({ message: 'El carrito al que intenta agregar un producto, no existe'});
+    }
+  } catch (error) {
+    res.status(500).send({ message: 'Error al buscar el carrito'})
+  }
+});
+
+export default cartsRouter;
